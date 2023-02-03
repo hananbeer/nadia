@@ -1,101 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!--
-      This is the page head - it contains info the browser uses to display the page
-      You won't see what's in the head in the page
-      Scroll down to the body element for the page content
-    -->
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://glitch.com/favicon.ico" />
+<head>
+  <title>three.js webgl - morph targets - face</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="main.css">
+  <style>
+    body {
+      background-color: #111111;
+    }
+  </style>
+</head>
 
-    <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+<body>
 
-    <title>Hello World!</title>
+  <!-- 
+    <div id="info">
+      <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - morph targets - face<br/>
+      model by <a href="https://www.bannaflak.com/face-cap" target="_blank" rel="noopener">Face Cap</a>
+    </div> -->
 
-    <!-- Meta tags for SEO and social sharing -->
-    <link rel="canonical" href="https://glitch-hello-website.glitch.me/" />
-    <meta
-      name="description"
-      content="A simple website, built with Glitch. Remix it to get your own."
-    />
-    <meta name="robots" content="index,follow" />
-    <meta property="og:title" content="Hello World!" />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://glitch-hello-website.glitch.me/" />
-    <meta
-      property="og:description"
-      content="A simple website, built with Glitch. Remix it to get your own."
-    />
-    <meta
-      property="og:image"
-      content="https://cdn.glitch.com/605e2a51-d45f-4d87-a285-9410ad350515%2Fhello-website-social.png?v=1616712748147"
-    />
-    <meta name="twitter:card" content="summary" />
+  <!-- Import maps polyfill -->
+  <!-- Remove this when import maps will be widely supported -->
+  <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 
-    <!-- Import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/style.css" />
+  <script type="importmap">
+      {
+        "imports": {
+          "three": "../build/three.module.js",
+          "three/addons/": "./jsm/"
+        }
+      }
+    </script>
 
-    <!-- Import the webpage's javascript file -->
-    <script src="/script.js" defer></script>
-  </head>
-  <body>
-    <!--
-      This is the body of the page
-      Look at the elements and see how they appear in the rendered page on the right
-      Each element is defined using tags, with < and > indicating where each one opens and closes
-      There are elements for sections of the page, images, text, and more
-      The elements include attributes referenced in the CSS for the page style
-    -->
+  <script type="module">
 
-    <!-- The wrapper and content divs set margins and positioning -->
-    <div class="wrapper">
-      <div class="content" role="main">
-        <!-- This is the start of content for our page -->
-        <h1 class="title">Hello World!</h1>
+    import * as THREE from 'three';
 
-        <img
-          src="https://cdn.glitch.com/a9975ea6-8949-4bab-addb-8a95021dc2da%2Fillustration.svg?v=1618177344016"
-          class="illustration"
-          alt="Editor illustration"
-          title="Click the image!"
-        />
-        <!-- Instructions on using this project -->
-        <div class="instructions">
-          <h2>
-            Using this project
-          </h2>
-          <p>
-            This is the Glitch <strong>Hello Website</strong> project. You can
-            use it to build your own site. Check out README.md in the editor for
-            more info and next steps you can take!
-          </p>
-          <!-- ADD BUTTON HERE -->
-          
-          <!-- Once you've added the button from the readme, click it in the page -->
-          <!-- Check out the function in script.js to see how it works -->
-        </div>
-      </div>
-    </div>
-    <!-- The footer holds our remix button — you can use it for structure or cut it out ✂ -->
-    <footer class="footer">
-      <div class="links"></div>
-      <a
-        class="btn--remix"
-        target="_top"
-        href="https://glitch.com/edit/#!/remix/glitch-hello-website"
-      >
-        <img
-          src="https://cdn.glitch.com/605e2a51-d45f-4d87-a285-9410ad350515%2FLogo_Color.svg?v=1618199565140"
-          alt=""
-        />
-        Remix on Glitch
-      </a>
-    </footer>
-  </body>
+    import Stats from 'three/addons/libs/stats.module.js';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+    import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+    import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    init();
+
+    let mesh = null
+    let head = null
+
+		const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+		const clamp01 = (n) => clamp(n, 0, 1)
+
+		let rX = 0
+		let rY = 0
+
+
+		function smoothstep(a, b, t) {
+			if (t < a)
+					return 0
+
+			if (t >= b)
+					return 1
+
+			let x = (t - a) / (b - a)
+			return (x * x) * (3 - 2 * x)
+		}
+
+
+    function init() {
+
+      let mixer;
+
+      const clock = new THREE.Clock();
+
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      // const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 2000);
+			const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+      // camera.position.set(0, 0.52, 10.6);
+			camera.position.set( 0, 155, 60 );
+
+      const scene = new THREE.Scene();
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+			// renderer.setClearColor(0x551199, 1)
+
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+
+
+
+
+				const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				hemiLight.position.set( 0, 100, 10 );
+				scene.add( hemiLight );
+
+				// const dirLight = new THREE.DirectionalLight( 0xffffff );
+				// dirLight.position.set( 0, 200, 100 );
+				// dirLight.castShadow = true;
+				// dirLight.shadow.camera.top = 180;
+				// dirLight.shadow.camera.bottom = - 100;
+				// dirLight.shadow.camera.left = - 120;
+				// dirLight.shadow.camera.right = 120;
+				// scene.add( dirLight );
+
+
+
+
+      container.appendChild(renderer.domElement);
+
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      document.body.appendChild(link); // Firefox workaround, see #6594
+
+      function save(blob, filename) {
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        // URL.revokeObjectURL( url ); breaks Firefox...
+      }
+
+      function saveString(text, filename) {
+        save(new Blob([text], { type: 'text/plain' }), filename);
+      }
+
+      function exportGLTF(input) {
+        const gltfExporter = new GLTFExporter();
+
+        function exportModel() {
+          exportGLTF(input);
+        }
+
+        const params = {
+          trs: false,
+          onlyVisible: true,
+          binary: false,
+          maxTextureSize: 4096,
+          // exportModel: input
+          exportModel: exportModel,
+        };
+
+        const options = {
+          trs: params.trs,
+          onlyVisible: params.onlyVisible,
+          binary: params.binary,
+          maxTextureSize: params.maxTextureSize
+        };
+        gltfExporter.parse(
+          input,
+          function (result) {
+            if (result instanceof ArrayBuffer) {
+              saveArrayBuffer(result, 'scene.glb');
+            } else {
+              const output = JSON.stringify(result, null, 2);
+              console.log(output);
+              saveString(output, 'scene.gltf');
+            }
+          },
+          function (error) {
+            console.log('An error happened during parsing', error);
+          },
+          options
+        );
+      }
+
+      // const ktx2Loader = new KTX2Loader()
+      //   .setTranscoderPath('jsm/libs/basis/')
+      //   .detectSupport(renderer);
+
+      // new GLTFLoader()
+      //   .setKTX2Loader(ktx2Loader)
+      //   .setMeshoptDecoder(MeshoptDecoder)
+			// .load('models/gltf/nadia6.glb', (gltf) => {
+
+			new FBXLoader()
+        //.load('models/fbx/nadia7.fbx', (fbx) => {
+      .load('https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia7.txt?v=1675468005531', (fbx) => {
+
+					// nadia2 eyes: L 136, R 139
+          scene.add(fbx);
+
+          head = fbx.children[1]
+					window.T = THREE
+
+					window.fbx = fbx
+					window.head = head
+					// window.V3 = THREE.Vector3
+
+					// look up a bit
+					//head.skeleton.bones[6].rotation.x -= 0.5
+
+					return
+          // debugger
+					
+          // mesh = gltf.scene.children[0];
+
+          // // mixer = new THREE.AnimationMixer( mesh );
+          // // debugger
+
+          // // mixer.clipAction( gltf.animations[ 0 ] ).play();
+
+          // // GUI
+
+          // head = mesh.children[1] //mesh.getObjectByName( 'Nadia_Fortune' );
+          // const influences = head.morphTargetInfluences;
+
+          // const gui = new GUI();
+          // gui.close();
+
+          // for (const [key, value] of Object.entries(head.morphTargetDictionary)) {
+
+          //   gui.add(influences, value, 0, 1, 0.01)
+          //     .name(key.replace('blendShape1.', ''))
+          //     .listen(influences);
+
+          // }
+
+          // // exportGLTF(gltf)
+
+        });
+
+      const environment = new RoomEnvironment();
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+      scene.background = new THREE.Color(0x222222);
+      scene.environment = pmremGenerator.fromScene(environment).texture;
+
+      // const controls = new OrbitControls( camera, renderer.domElement );
+      // controls.enableDamping = true;
+      // controls.minDistance = 2.5;
+      // controls.maxDistance = 5;
+      // controls.minAzimuthAngle = - Math.PI / 2;
+      // controls.maxAzimuthAngle = Math.PI / 2;
+      // controls.maxPolarAngle = Math.PI / 1.8;
+      // controls.target.set( 0, 0.15, - 0.2 );
+
+      // const stats = new Stats();
+      // container.appendChild( stats.dom );
+
+      renderer.setAnimationLoop(() => {
+
+        const delta = clock.getDelta();
+
+				if (head) {
+					applyEffects()
+				}
+
+        renderer.render(scene, camera);
+
+        // controls.update();
+        // stats.update();
+
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        let width = document.body.clientWidth
+        let height = document.body.clientHeight
+        // choose if range is 0..1 or -0.5..0.5
+        rX = (e.clientX / width) //- 0.5
+        rY = (e.clientY / height) //- 0.5
+        // console.log(rX, rY)
+      });
+
+    }
+
+		function applyEffects() {
+				/*
+				// for (let i in head.morphTargetInfluences) {
+				//   head.morphTargetInfluences[i] += (Math.random() - 0.5) / 50
+				// }
+
+				// facs_bs_MouthLeft_div2
+				head.morphTargetInfluences[22] = clamp01(2 * rX)
+				// facs_bs_MouthUpperUpLeft_div2
+				head.morphTargetInfluences[37] = clamp01((2 * rX) * (-2 * rY + 0.5))
+
+				// facs_bs_MouthRight_div2
+				head.morphTargetInfluences[28] = clamp01(1 - 2 * rX)
+				// facs_bs_MouthUpperUpRight_div2
+				head.morphTargetInfluences[38] = clamp01((1 - 2 * rX) * (-2 * rY + 0.5))
+
+				// facs_bs_MouthStretchLeft_div2
+				// head.morphTargetInfluences[35] = Math.max(0, Math.min(1, rX))
+			}
+			*/
+
+			// eyeL
+			head.skeleton.bones[192].rotation.z = 1.35 * (rX - 0.4)
+			head.skeleton.bones[192].rotation.x = -rY + 0.5
+
+			// eyeR
+			head.skeleton.bones[195].rotation.z = 1.35 * (rX - 0.5)
+			head.skeleton.bones[195].rotation.x = -rY + 0.5
+
+			// head/neck
+			head.skeleton.bones[6].rotation.x = rY - 0.7
+			head.skeleton.bones[6].rotation.y = rX - 0.5
+
+
+			const tau = 6.28
+			const speed = 0.1
+			const resolution = 1000
+			let t = ((Date.now() * speed) % resolution) / resolution
+			let x = Math.sin(t * tau)
+
+			// hairL
+			head.skeleton.bones[197].rotation.z = T.MathUtils.lerp(-0.15, -0.2, x)
+			head.skeleton.bones[198].rotation.z = T.MathUtils.lerp(0.0, 0.2, x)
+			// head.skeleton.bones[199].rotation.z = T.MathUtils.lerp(0.0, -0.05, t)
+
+			// hairR			
+			head.skeleton.bones[200].rotation.z = T.MathUtils.lerp(0.05, 0.1, x)
+			head.skeleton.bones[201].rotation.z = T.MathUtils.lerp(0.05, 0.1, x)
+			// head.skeleton.bones[202].rotation.z = T.MathUtils.lerp(0.0, -0.03, x)
+
+
+			let speed2 = 0.5
+			let t2 = Date.now() * speed2 / resolution
+
+			fbx.children[2].morphTargetInfluences[0] = clamp01(T.MathUtils.lerp(-10, 3, (Math.sin(t2) + 1.0) / 2.0))
+			fbx.children[2].morphTargetInfluences[1] = clamp01(T.MathUtils.lerp(-10, 3, (Math.sin(t2 + 0.3) + 1.0) / 2.0))
+			fbx.children[2].morphTargetInfluences[1] = clamp01(T.MathUtils.lerp(-10, 3, (Math.sin(t2 + 0.9) + 1.0) / 2.0))
+		}
+
+    // let idx = 0
+    // function onMouseDown(e) {
+    //   if (e.which == 1) { // left
+    //     el_ctrl.style['left'] = e.clientX + 'px'
+    //     el_ctrl.style['top'] = e.clientY + 'px'
+    //   } else if (e.which == 2) { // middle
+    //     head.morphTargetInfluences[clamp(idx, 0, head.morphTargetInfluences.length)] = 1;
+    //   } else if (e.which == 3) { // right
+    //     el_ctrl.style['width'] = (e.clientX - el_ctrl.style['left'].slice(0, -2)) + 'px'
+    //     el_ctrl.style['height'] = (e.clientY - el_ctrl.style['left'].slice(0, -2)) + 'px'
+    //   }
+    // }
+
+    // function onMouseWheel(e) {
+		// 	head.morphTargetInfluences[idx] = 0
+
+    //   if (e.deltaY > 0)
+    //     idx++
+    //   else
+    //     idx--
+
+		// 		head.morphTargetInfluences[idx] = 1
+		// 		console.log(idx, Object.keys(head.morphTargetDictionary)[idx])
+    // }
+
+    // window.addEventListener('mousedown', onMouseDown)
+    // window.addEventListener('mousewheel', onMouseWheel)
+  </script>
+<!-- 
+  <div id="el_ctrl" style="
+    background: radial-gradient(white, black);
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+    height: 100px;
+    z-index: 100;
+    opacity: 0.3;
+"></div> -->
+
+</body>
+
 </html>
