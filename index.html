@@ -35,22 +35,21 @@
     </script>
 
   <script type="module">
-
     import * as THREE from 'three';
 
-    import Stats from 'three/addons/libs/stats.module.js';
+    // import Stats from 'three/addons/libs/stats.module.js';
 
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    // import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
-    import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-    import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+		// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    // import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+    // import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+    // import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    // import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
     init();
 
@@ -187,8 +186,7 @@
 			// .load('models/gltf/nadia6.glb', (gltf) => {
 
 			new FBXLoader()
-        //.load('models/fbx/nadia7.fbx', (fbx) => {
-      .load('https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia7.txt?v=1675468005531', (fbx) => {
+        .load('models/fbx/nadia7.fbx', (fbx) => {
 
 					// nadia2 eyes: L 136, R 139
           scene.add(fbx);
@@ -343,45 +341,7 @@
 			fbx.children[2].morphTargetInfluences[1] = clamp01(T.MathUtils.lerp(-10, 3, (Math.sin(t2 + 0.9) + 1.0) / 2.0))
 		}
 
-    // let idx = 0
-    // function onMouseDown(e) {
-    //   if (e.which == 1) { // left
-    //     el_ctrl.style['left'] = e.clientX + 'px'
-    //     el_ctrl.style['top'] = e.clientY + 'px'
-    //   } else if (e.which == 2) { // middle
-    //     head.morphTargetInfluences[clamp(idx, 0, head.morphTargetInfluences.length)] = 1;
-    //   } else if (e.which == 3) { // right
-    //     el_ctrl.style['width'] = (e.clientX - el_ctrl.style['left'].slice(0, -2)) + 'px'
-    //     el_ctrl.style['height'] = (e.clientY - el_ctrl.style['left'].slice(0, -2)) + 'px'
-    //   }
-    // }
-
-    // function onMouseWheel(e) {
-		// 	head.morphTargetInfluences[idx] = 0
-
-    //   if (e.deltaY > 0)
-    //     idx++
-    //   else
-    //     idx--
-
-		// 		head.morphTargetInfluences[idx] = 1
-		// 		console.log(idx, Object.keys(head.morphTargetDictionary)[idx])
-    // }
-
-    // window.addEventListener('mousedown', onMouseDown)
-    // window.addEventListener('mousewheel', onMouseWheel)
   </script>
-<!-- 
-  <div id="el_ctrl" style="
-    background: radial-gradient(white, black);
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100px;
-    height: 100px;
-    z-index: 100;
-    opacity: 0.3;
-"></div> -->
 
 </body>
 
