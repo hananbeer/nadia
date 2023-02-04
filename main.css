@@ -1,11 +1,18 @@
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
+	overscroll-behavior: none;
+  height: 100%;
+  overflow: auto;
 	margin: 0;
 	background-color: #000;
 	color: #fff;
 	font-family: Monospace;
 	font-size: 13px;
 	line-height: 24px;
-	overscroll-behavior: none;
 }
 
 a {

@@ -10,9 +10,10 @@
   <meta property="og:title" content="Nadia" />
   <meta property="og:url" content="https://nadia3.glitch.me/" />
   <meta property="og:image" content="https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia.png?v=1675469605474" />
+  <meta property="og:description" content="Meet Nadia" />
 
   <meta name="twitter:card" content="Meet Nadia" />
-  <meta name="twitter:site" content="@high_byte" />
+  <meta name="twitter:creator" content="@high_byte" />
   <meta name="twitter:title" content="Nadia" />
   <meta name="twitter:description" content="Meet Nadia" />
   <meta name="twitter:image" content="https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia.png?v=1675469605474" />
@@ -284,14 +285,17 @@
 
       });
 
-      window.addEventListener('mousemove', (e) => {
+      function onMove(e) {
         let width = document.body.clientWidth
         let height = document.body.clientHeight
         // choose if range is 0..1 or -0.5..0.5
         rX = (e.clientX / width) //- 0.5
         rY = (e.clientY / height) //- 0.5
         // console.log(rX, rY)
-      });
+      }
+      
+      window.addEventListener('mousemove', onMove)
+      window.addEventListener('touchmove', (e) => onMove(e.touches[0]))
 
     }
 
