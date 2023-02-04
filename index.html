@@ -5,6 +5,18 @@
   <title>three.js webgl - morph targets - face</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  
+  
+  <meta property="og:title" content="Nadia" />
+  <meta property="og:url" content="https://nadia3.glitch.me/" />
+  <meta property="og:image" content="https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia.png?v=1675469605474" />
+
+  <meta name="twitter:card" content="Meet Nadia" />
+  <meta name="twitter:site" content="@high_byte" />
+  <meta name="twitter:title" content="Nadia" />
+  <meta name="twitter:description" content="Meet Nadia" />
+  <meta name="twitter:image" content="https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia.png?v=1675469605474" />
+  
   <link type="text/css" rel="stylesheet" href="main.css">
   <style>
     body {
@@ -186,8 +198,9 @@
 			// .load('models/gltf/nadia6.glb', (gltf) => {
 
 			new FBXLoader()
-        .load('models/fbx/nadia7.fbx', (fbx) => {
-
+        //.load('models/fbx/nadia7.fbx', (fbx) => {
+         .load('https://cdn.glitch.global/64b14728-5ae2-4437-b4aa-7d51e897afea/nadia7.txt?v=1675468005531', (fbx) => {
+        
 					// nadia2 eyes: L 136, R 139
           scene.add(fbx);
 
